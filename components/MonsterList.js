@@ -40,7 +40,7 @@ const MonsterList = () => {
                 <TouchableOpacity onPress={() => toggleExpand(item.id)}>
                     <View style={styles.item}>
                         <Text style={styles.title}>{item.name}</Text>
-                        <Text>Challenge Rating: {item.cr}</Text>
+                        <Text>CR {item.cr}</Text>
                         {expandedId === item.id && (
                             <View style={styles.details}>
                                 <Text>Type {item.type}</Text>
