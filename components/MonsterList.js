@@ -29,45 +29,101 @@ const MonsterList = () => {
     }
 
     if (error) {
-        return <Text>Error: {error.message}</Text>;
+        return <Text style={styles.errorText}>Error: {error.message}</Text>;
     }
 
     return (
+        <View style={styles.container}>
+            <View style={styles.headerRow}>
+                <Text style={styles.headerText}>Monster</Text>
+                <Text style={styles.headerText}>CR</Text>
+            </View>
         <FlatList
             data={monsters}
             keyExtractor={item => item.id.toString()}
-            renderItem={({item}) => (
+            renderItem={({item, index}) => (
                 <TouchableOpacity onPress={() => toggleExpand(item.id)}>
-                    <View style={styles.item}>
-                        <Text style={styles.title}>{item.name}</Text>
-                        <Text>CR {item.cr}</Text>
-                        {expandedId === item.id && (
-                            <View style={styles.details}>
-                                <Text>Type {item.type}</Text>
-                                <Text>Source {item.source_book}</Text>
-                                <Text>Size {item.size}</Text>
-                                <Text>Alignment {item.alignment}</Text>
+                    <View style={[styles.item, index % 2 === 0 ? styles.darkItem : styles.lightItem]}>
+                        <View style={styles.row}>
+                            <View style={styles.column}>
+                                <Text style={styles.title}>{item.name}</Text>
+                                {expandedId === item.id && (
+                                    <View>
+                                        <Text style={styles.detailText}>Type: {item.type}</Text>
+                                        <Text style={styles.detailText}>Source: {item.source_book}</Text>
+                                    </View>
+                                )}
                             </View>
-                        )}
+                            <View style={styles.column}>
+                                <Text style={styles.subtitle}>CR {item.cr}</Text>
+                                {expandedId === item.id && (
+                                    <View>
+                                        <Text style={styles.detailText}>Size: {item.size}</Text>
+                                        <Text style={styles.detailText}>Alignment: {item.alignment}</Text>
+                                    </View>
+                                )}
+                            </View>
+                        </View>
                     </View>
                 </TouchableOpacity>
             )}
             contentContainerStyle={styles.container}
         />
+        </View>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
-        padding: 20,
+        backgroundColor: '#1E1E1E',
+        flex: 1,
+    },
+    headerRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        backgroundColor: '#D9D9D9',
+        borderTopLeftRadius: 5,
+        borderTopRightRadius: 5,
+        padding: 5,
+    },
+    headerText: {
+        fontSize: 12,
+        fontWeight: 'bold',
+        color: '#000',
     },
     item: {
-        marginBottom: 15,
+        padding: 8,
+    },
+    darkItem: {
+        backgroundColor: '#2C2C2C',
+    },
+    lightItem: {
+        backgroundColor: '#4C4C4C',
+    },
+    row: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+    },
+    column: {
+        flex: 1,
     },
     title: {
         fontSize: 18,
         fontWeight: 'bold',
+        color: '#fff',
+    },
+    subtitle: {
+        fontSize: 18,
+        color: '#fff',
+    },
+    detailText: {
+        color: '#fff',
+        marginTop: 5,
+    },
+    errorText: {
+        color: 'red',
     },
 });
 
 export default MonsterList;
+
