@@ -1,6 +1,8 @@
 import React, {useEffect, useState} from 'react';
-import {ActivityIndicator, FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View} from 'react-native';
+import {ActivityIndicator, Button, FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View} from 'react-native';
 import axios from 'axios';
+
+const PAGE_SIZE = 14;
 
 const MonsterList = () => {
     const [monsters, setMonsters] = useState([]);
@@ -8,6 +10,7 @@ const MonsterList = () => {
     const [error, setError] = useState(null);
     const [expandedId, setExpandedId] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
 
     useEffect(() => {
         axios.get('http://127.0.0.1:8000/api/monsters')
@@ -26,14 +29,31 @@ const MonsterList = () => {
     };
 
     const handleSearch = (text) => {
-        if (text) {
-            setSearchQuery(text);
-        }
+        setSearchQuery(text);
     };
 
+    //try and change to be a use memo
     const filteredMonsters = monsters.filter(monster =>
         monster.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
+
+    const startIndex = (currentPage - 1) * PAGE_SIZE;
+    const endIndex = startIndex + PAGE_SIZE;
+    const currentMonsters = filteredMonsters.slice(startIndex, endIndex);
+    const totalPages = Math.ceil(filteredMonsters.length / PAGE_SIZE);
+
+    const handleNextPage = () => {
+        if (currentPage < totalPages) {
+            setCurrentPage(currentPage + 1);
+        }
+    };
+
+    const handlePreviousPage = () => {
+        if (currentPage > 1) {
+            setCurrentPage(currentPage - 1);
+        }
+    };
+
 
     const getCrStyle = (cr) => {
         if (cr >= 1 && cr <= 9) {
@@ -69,7 +89,7 @@ const MonsterList = () => {
                 <Text style={styles.headerText}>CR</Text>
             </View>
         <FlatList
-            data={filteredMonsters}
+            data={currentMonsters}
             keyExtractor={item => item.id.toString()}
             renderItem={({item, index}) => (
                 <TouchableOpacity onPress={() => toggleExpand(item.id)}>
@@ -99,6 +119,11 @@ const MonsterList = () => {
             )}
             contentContainerStyle={styles.container}
         />
+            <View style={styles.pagination}>
+                <Button title="Previous" onPress={handlePreviousPage} disabled={currentPage === 1}/>
+                <Text style={styles.pageNumber}>Page {currentPage} of {totalPages}</Text>
+                <Button title="Next" onPress={handleNextPage} disabled={currentPage === totalPages}/>
+            </View>
         </View>
     );
 };
@@ -177,6 +202,17 @@ const styles = StyleSheet.create({
     },
     errorText: {
         color: 'red',
+    },
+    pagination: {
+        flexDirection: 'row',
+        justifyContent: 'space-evenly',
+        alignItems: 'center',
+        marginTop: 5,
+        marginBottom: 5,
+    },
+    pageNumber: {
+        fontSize: 16,
+        color: '#fff',
     },
 });
 
