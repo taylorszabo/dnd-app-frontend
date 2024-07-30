@@ -30,12 +30,20 @@ const MonsterList = () => {
 
     const handleSearch = (text) => {
         setSearchQuery(text);
+        setCurrentPage(1);
     };
 
-    //try and change to be a use memo
-    const filteredMonsters = monsters.filter(monster =>
-        monster.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const filteredMonsters = monsters.filter(monster => {
+        const searchString = [
+            monster.name,
+            monster.cr,
+            monster.type,
+            monster.source,
+            monster.size,
+            monster.alignment
+        ].join(' ').toLowerCase();
+        return searchString.includes(searchQuery.toLowerCase());
+    });
 
     const startIndex = (currentPage - 1) * PAGE_SIZE;
     const endIndex = startIndex + PAGE_SIZE;
