@@ -179,7 +179,7 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     subtitleColumn: {
-        flex: 1,
+        flex: 0.5,
         paddingLeft: 40,
     },
     title: {
