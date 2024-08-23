@@ -1,6 +1,8 @@
 import React, {useEffect, useState} from 'react';
 import {ActivityIndicator, Button, FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View} from 'react-native';
 import axios from 'axios';
+import {Ionicons} from '@expo/vector-icons';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const PAGE_SIZE = 14;
 
@@ -12,7 +14,34 @@ const MonsterList = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
 
+    const [encounterId, setEncounterId] = useState(null);
+
     useEffect(() => {
+        const initializeEncounter = async () => {
+            try {
+                let storedEncounterId = await AsyncStorage.getItem('encounterId');
+                if (!storedEncounterId) {
+                    storedEncounterId = generateEncounterId();
+                    await AsyncStorage.setItem('encounterId', storedEncounterId);
+                }
+                setEncounterId(storedEncounterId);
+            } catch (err) {
+                console.error('Error initializing encounter:', err);
+            }
+        };
+
+        const generateEncounterId = () => {
+            return `encounter-${Math.floor(Math.random() * 1000000)}`;
+        };
+
+        initializeEncounter()
+            .then(storedEncounterId => {
+                setEncounterId(storedEncounterId);
+            })
+            .catch(err => {
+                console.error('Error after calling initializeEncounter:', err);
+            });
+
         axios.get('http://127.0.0.1:8000/api/monsters')
             .then(response => {
                 setMonsters(response.data);
@@ -74,6 +103,20 @@ const MonsterList = () => {
         return styles.crDefault;
     };
 
+    const addToEncounter = (monsterId) => {
+        console.log(monsterId, encounterId);
+        axios.post('http://127.0.0.1:8000/api/monsters/encounter', {
+            monster_id: monsterId,
+            encounter_id: encounterId,
+        })
+            .then(response => {
+                alert('Monster added to encounter!');
+            })
+            .catch(error => {
+                console.error('There was an error adding the monster to the encounter!', error);
+            });
+    };
+
 
     if (loading) {
         return <ActivityIndicator size="large" color="#0000ff"/>;
@@ -103,6 +146,9 @@ const MonsterList = () => {
                 <TouchableOpacity onPress={() => toggleExpand(item.id)}>
                     <View style={[styles.item, index % 2 === 0 ? styles.darkItem : styles.lightItem]}>
                         <View style={styles.row}>
+                            <TouchableOpacity onPress={() => addToEncounter(item.id)} style={styles.iconContainer}>
+                                <Ionicons name="add" size={24} color="white"/>
+                            </TouchableOpacity>
                             <View style={styles.titleColumn}>
                                 <Text style={styles.title}>{item.name}</Text>
                                 {expandedId === item.id && (
